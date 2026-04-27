@@ -1,8 +1,7 @@
 """
 FashionEmbedder
 ---------------
-Wraps Marqo-FashionCLIP to produce L2-normalised image and text embeddings.
-The model is loaded once and reused across calls.
+Wraps Marqo-FashionCLIP to produce L2-normalised image and text embeddings
 """
 
 from __future__ import annotations
@@ -24,16 +23,7 @@ MODEL_ID = "Marqo/marqo-fashionCLIP"
 class FashionEmbedder:
     """
     Produces dense visual embeddings for clothing images using
-    Marqo-FashionCLIP, a ViT-B/16 model fine-tuned on 1M+ fashion products.
-
-    Parameters
-    ----------
-    model_id : str
-        HuggingFace model identifier. Defaults to Marqo/marqo-fashionCLIP.
-    device : str or None
-        'cuda', 'cpu', or None (auto-detect).
-    cache_dir : str or Path or None
-        Where to cache downloaded model weights.
+    Marqo-FashionCLIP, a ViT-B/16 model fine-tuned on 1M+ fashion products
     """
 
     def __init__(
@@ -70,16 +60,7 @@ class FashionEmbedder:
         batch_size: int = 32,
     ) -> np.ndarray:
         """
-        Embed a list of images.
-
-        Parameters
-        ----------
-        images : list of file paths or PIL Images
-        batch_size : int
-
-        Returns
-        -------
-        np.ndarray of shape (N, embedding_dim), L2-normalised float32
+        Embed a list of images
         """
         pil_images = [self._load_image(img) for img in images]
         all_embeddings: List[np.ndarray] = []
@@ -97,11 +78,7 @@ class FashionEmbedder:
 
     def embed_text(self, texts: List[str], batch_size: int = 64) -> np.ndarray:
         """
-        Embed a list of text queries (for cross-modal search).
-
-        Returns
-        -------
-        np.ndarray of shape (N, embedding_dim), L2-normalised float32
+        Embed a list of text queries (for cross-modal search)
         """
         all_embeddings: List[np.ndarray] = []
 
