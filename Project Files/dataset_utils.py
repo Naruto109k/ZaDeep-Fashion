@@ -1,8 +1,6 @@
 """
 Dataset utilities
 -----------------
-Helpers for scanning a local image catalog directory and producing
-the ProductMeta list needed by CatalogIndexer.
 """
 
 from __future__ import annotations
@@ -24,22 +22,7 @@ def scan_image_directory(
     category_from_parent: bool = True,
 ) -> List[ProductMeta]:
     """
-    Recursively scan a directory of product images.
-
-    Assumes structure:
-        root/
-            category_a/
-                image1.jpg
-                image2.jpg
-            category_b/
-                ...
-
-    If category_from_parent is True, the immediate parent folder name
-    is used as the category label. Otherwise category is left empty.
-
-    Returns
-    -------
-    List[ProductMeta]
+    Recursively scan a directory of product images
     """
     root = Path(root)
     items: List[ProductMeta] = []
@@ -70,20 +53,7 @@ def load_kaggle_fashion_csv(
     max_items: Optional[int] = None,
 ) -> List[ProductMeta]:
     """
-    Load metadata from the Kaggle Fashion Product Images dataset CSV.
-
-    The CSV has columns: id, gender, masterCategory, subCategory,
-    articleType, baseColour, season, year, usage, productDisplayName.
-
-    Parameters
-    ----------
-    csv_path   : path to styles.csv
-    image_root : directory where {id}.jpg images live
-    max_items  : cap the number of items (useful for quick experiments)
-
-    Returns
-    -------
-    List[ProductMeta]
+    Load metadata from the Kaggle Fashion Product Images dataset CSV
     """
     csv_path = Path(csv_path)
     image_root = Path(image_root)
