@@ -1,8 +1,6 @@
 """
 CatalogIndexer
 --------------
-Builds, saves, and loads a FAISS IVF-PQ index over product image embeddings.
-Designed to handle tens of thousands of catalog items comfortably on CPU/GPU.
 """
 
 from __future__ import annotations
@@ -22,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ProductMeta:
-    """Lightweight metadata stored alongside each indexed embedding."""
+    """Lightweight metadata stored alongside each indexed embedding"""
 
     image_path: str
     product_id: str
@@ -33,15 +31,8 @@ class ProductMeta:
 
 class CatalogIndexer:
     """
-    Manages a FAISS flat inner-product index over L2-normalised embeddings.
-    (Inner product on unit vectors == cosine similarity.)
-
-    Parameters
-    ----------
-    embedding_dim : int
-        Dimensionality of embedding vectors (512 for Marqo-FashionCLIP).
-    use_gpu : bool
-        Move the FAISS index to GPU if available (faster search).
+    Manages a FAISS flat inner-product index over L2-normalised embeddings
+    (Inner product on unit vectors == cosine similarity)
     """
 
     def __init__(self, embedding_dim: int = 512, use_gpu: bool = False) -> None:
@@ -60,7 +51,7 @@ class CatalogIndexer:
         metadata: List[ProductMeta],
     ) -> None:
         """
-        Build the index from a pre-computed embedding matrix.
+        Build the index from a pre-computed embedding matrix
 
         Parameters
         ----------
@@ -147,16 +138,7 @@ class CatalogIndexer:
         self, query_embedding: np.ndarray, top_k: int = 10
     ) -> List[Dict]:
         """
-        Return the top-k most similar catalog items for a query embedding.
-
-        Parameters
-        ----------
-        query_embedding : np.ndarray, shape (embedding_dim,) or (1, embedding_dim)
-        top_k           : int
-
-        Returns
-        -------
-        List of dicts with keys: rank, score, product_id, image_path, category, name
+        Return the top-k most similar catalog items for a query embedding
         """
         if self._index is None:
             raise RuntimeError("Index not built. Call build() or load() first.")
