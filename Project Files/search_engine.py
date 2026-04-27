@@ -2,7 +2,7 @@
 FashionSearchEngine
 -------------------
 High-level API that combines FashionEmbedder and CatalogIndexer
-into a single interface. This is what the Streamlit app talks to.
+into a single interface. This is what the Streamlit app talks to
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class FashionSearchEngine:
     """
-    Unified interface for fashion visual search.
+    Unified interface for fashion visual search
 
     Usage
     -----
@@ -66,17 +66,9 @@ class FashionSearchEngine:
         top_k: int = 10,
     ) -> List[Dict]:
         """
-        Find catalog items visually similar to a query image.
-
-        Parameters
-        ----------
-        image : file path or PIL Image
-        top_k : int  number of results to return
-
-        Returns
-        -------
-        list of result dicts (rank, score, product_id, image_path, category, name)
+        Find catalog items visually similar to a query image
         """
+        
         embedding = self.embedder.embed_single_image(image)
         return self.get_index().search(embedding, top_k=top_k)
 
@@ -86,17 +78,9 @@ class FashionSearchEngine:
         top_k: int = 10,
     ) -> List[Dict]:
         """
-        Find catalog items matching a text description (cross-modal search).
-
-        Parameters
-        ----------
-        query : str  e.g. "navy blue slim-fit blazer"
-        top_k : int
-
-        Returns
-        -------
-        list of result dicts
+        Find catalog items matching a text description (cross-modal search)
         """
+        
         embedding = self.embedder.embed_text([query])[0]
         return self.get_index().search(embedding, top_k=top_k)
 
@@ -105,7 +89,7 @@ class FashionSearchEngine:
         embedding: np.ndarray,
         top_k: int = 10,
     ) -> List[Dict]:
-        """Search directly from a pre-computed embedding vector."""
+        """Search directly from a pre-computed embedding vector"""
         return self.get_index().search(embedding, top_k=top_k)
 
     @property
