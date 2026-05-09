@@ -6,6 +6,7 @@ torch>=2.0.0
 torchvision>=0.15.0
 transformers>=4.38.0
 accelerate>=0.27.0
+open-clip-torch>=2.20.0
 
 # Vector search
 faiss-cpu>=1.7.4          # swap for faiss-gpu if you have CUDA
