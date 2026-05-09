@@ -6,21 +6,30 @@ Upload a clothing photo (or type a description) and ZaDeep Fashion returns the m
 
 ---
 
+### 🖼️ Search by Image
+![Image Search Demo](assets/demo_image.gif)
+
+### 🔤 Search by Text
+![Text Search Demo](assets/demo_text.gif)
+
+---
+
 ## How it works
 
 ```
 Query image / text
-       │
-       ▼
+│
+▼
 Marqo-FashionCLIP encoder   ← fine-tuned ViT-B/16, trained on 1M+ fashion products
-       │
-       ▼  512-dim L2-normalised embedding
-       │
-       ▼
+│
+▼  512-dim L2-normalised embedding
+│
+▼
 FAISS flat inner-product index   ← cosine similarity at scale
-       │
-       ▼
+│
+▼
 Top-K similar catalog items
+
 ```
 
 Both **image-to-image** and **text-to-image** (cross-modal) search are supported using the same shared embedding space.
@@ -30,24 +39,21 @@ Both **image-to-image** and **text-to-image** (cross-modal) search are supported
 ## Project structure
 
 ```
-zadeep-fashion/
-├── src/
-│   ├── embedder/
-│   │   └── fashion_embedder.py   # wraps Marqo-FashionCLIP
-│   ├── indexer/
-│   │   └── catalog_indexer.py    # builds/saves/queries FAISS index
-│   ├── search/
-│   │   └── search_engine.py      # high-level API combining embedder + indexer
-│   └── utils/
-│       └── dataset_utils.py      # catalog scanning and CSV loading
-├── app/
-│   ├── app.py                    # Streamlit entry point
-│   └── components.py             # UI components
-├── scripts/
-│   └── build_index.py            # one-time embedding + indexing script
-├── colab_quickstart.ipynb        # end-to-end Colab notebook
+ZaDeep-Fashion/
+├── Project Files/
+│   ├── app.py                  # Streamlit entry point
+│   ├── components.py           # UI components
+│   ├── fashion_embedder.py     # wraps Marqo-FashionCLIP
+│   ├── catalog_indexer.py      # builds/saves/queries FAISS index
+│   ├── search_engine.py        # high-level API combining embedder + indexer
+│   ├── dataset_utils.py        # catalog scanning and CSV loading
+│   ├── build_index.py          # one-time embedding + indexing script
+│   └── colab_quickstart.ipynb  # end-to-end Colab notebook
+├── examples/                   # sample clothing images for testing
+├── assets/                     # demo GIFs
 ├── requirements.txt
 └── README.md
+
 ```
 
 ---
@@ -57,8 +63,8 @@ zadeep-fashion/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/zadeep-fashion.git
-cd zadeep-fashion
+git clone https://github.com/Naruto109k/ZaDeep-Fashion.git
+cd ZaDeep-Fashion
 pip install -r requirements.txt
 ```
 
@@ -75,7 +81,8 @@ Or point `build_index.py` at any folder of product images.
 ### 3. Build the index
 
 ```bash
-python scripts/build_index.py \
+cd "Project Files"
+python build_index.py \
     --csv data/fashion-dataset/styles.csv \
     --images data/fashion-dataset/images \
     --output models/index \
@@ -89,7 +96,7 @@ Use `--max_items 5000` for a quick smoke test.
 ### 4. Run the app
 
 ```bash
-streamlit run app/app.py
+python -m streamlit run "Project Files/app.py"
 ```
 
 ---
@@ -97,7 +104,7 @@ streamlit run app/app.py
 ## Usage as a library
 
 ```python
-from src.search.search_engine import FashionSearchEngine
+from search_engine import FashionSearchEngine
 
 engine = FashionSearchEngine()
 engine.load_index("models/index")
@@ -126,9 +133,9 @@ Open `colab_quickstart.ipynb` — it walks through dataset download, indexing, s
 |---|---|
 | Visual embeddings | [Marqo-FashionCLIP](https://huggingface.co/Marqo/marqo-fashionCLIP) (ViT-B/16) |
 | Vector index | [FAISS](https://github.com/facebookresearch/faiss) — flat inner-product |
-| Deep learning | PyTorch + HuggingFace Transformers |
+| Deep learning | PyTorch + OpenCLIP |
 | UI | Streamlit |
-| Dataset | Kaggle Fashion Product Images / DeepFashion2 |
+| Dataset | Kaggle Fashion Product Images |
 
 ---
 
@@ -140,3 +147,7 @@ Open `colab_quickstart.ipynb` — it walks through dataset download, indexing, s
 - **Add metadata filtering**: filter FAISS results by category, gender, or colour before returning them.
 
 ---
+
+## License
+
+MIT © [Naruto109k](https://github.com/Naruto109k)
