@@ -2,7 +2,7 @@
 FashionSearchEngine
 -------------------
 High-level API that combines FashionEmbedder and CatalogIndexer
-into a single interface. This is what the Streamlit app talks to.
+into a single interface. This is what the Streamlit app talks to
 """
 
 from __future__ import annotations
@@ -14,10 +14,34 @@ from typing import Dict, List, Union
 import numpy as np
 from PIL import Image
 
-from src.embedder.fashion_embedder import FashionEmbedder
-from src.indexer.catalog_indexer import CatalogIndexer
+from fashion_embedder import FashionEmbedder
+from catalog_indexer import CatalogIndexer
 
 logger = logging.getLogger(__name__)
+
+# -- Auto-detect index path --------------------------------------------------
+def _find_index_dir() -> Path:
+    """Search common locations for the FAISS index directory."""
+    candidates = [
+        Path(__file__).parent / "models" / "index",
+        Path(__file__).parent.parent / "models" / "index",
+        Path("models") / "index",
+        Path("../models/index"),
+    ]
+    for candidate in candidates:
+        if candidate.exists() and any(candidate.iterdir()):
+            logger.info("Found index at: %s", candidate.resolve())
+            return candidate.resolve()
+
+    # None found — give a helpful error
+    searched = "\n  ".join(str(c.resolve()) for c in candidates)
+    raise RuntimeError(
+        f"No catalog index found. Searched:\n  {searched}\n\n"
+        f"Run this to build it:\n"
+        f"  cd 'Project Files'\n"
+        f"  python build_index.py --images clothes\n"
+    )
+# ----------------------------------------------------------------------------
 
 
 class FashionSearchEngine:
@@ -27,7 +51,8 @@ class FashionSearchEngine:
     Usage
     -----
     engine = FashionSearchEngine()
-    engine.load_index("models/index")
+    engine.load_index()           # auto-detects index location
+    engine.load_index("models/index")  # or provide path explicitly
     results = engine.search_by_image("query.jpg", top_k=8)
     results = engine.search_by_text("red floral summer dress", top_k=8)
     """
@@ -37,22 +62,36 @@ class FashionSearchEngine:
         model_id: str = "Marqo/marqo-fashionCLIP",
         device: str | None = None,
     ) -> None:
-        self.embedder = FashionEmbedder(model_id=model_id, device=device)
+        self.embedder = FashionEmbedder(device=device)
         self.indexer: CatalogIndexer | None = None
 
     # ------------------------------------------------------------------
     # Index management
     # ------------------------------------------------------------------
 
-    def load_index(self, directory: str | Path, use_gpu: bool = False) -> None:
-        """Load a pre-built FAISS catalog index from disk."""
+    def load_index(self, directory: str | Path | None = None, use_gpu: bool = False) -> None:
+        """Load a pre-built FAISS catalog index from disk.
+        If no directory is given, auto-detects the index location.
+        """
+        if directory is None:
+            directory = _find_index_dir()
+        directory = Path(directory)
+        if not directory.exists():
+            raise RuntimeError(
+                f"Index directory not found: {directory.resolve()}\n\n"
+                f"Run this to build it:\n"
+                f"  cd 'Project Files'\n"
+                f"  python build_index.py --images clothes\n"
+            )
         self.indexer = CatalogIndexer.load(directory, use_gpu=use_gpu)
         logger.info("Search engine ready. Catalog size: %d", self.indexer.total_items)
 
     def get_index(self) -> CatalogIndexer:
         if self.indexer is None:
             raise RuntimeError(
-                "No index loaded. Call load_index() or build an index with scripts/build_index.py."
+                "No index loaded. Call load_index() first or run:\n"
+                "  cd 'Project Files'\n"
+                "  python build_index.py --images clothes"
             )
         return self.indexer
 
@@ -66,16 +105,7 @@ class FashionSearchEngine:
         top_k: int = 10,
     ) -> List[Dict]:
         """
-        Find catalog items visually similar to a query image.
-
-        Parameters
-        ----------
-        image : file path or PIL Image
-        top_k : int  number of results to return
-
-        Returns
-        -------
-        list of result dicts (rank, score, product_id, image_path, category, name)
+        Find catalog items visually similar to a query image
         """
         embedding = self.embedder.embed_single_image(image)
         return self.get_index().search(embedding, top_k=top_k)
@@ -86,16 +116,7 @@ class FashionSearchEngine:
         top_k: int = 10,
     ) -> List[Dict]:
         """
-        Find catalog items matching a text description (cross-modal search).
-
-        Parameters
-        ----------
-        query : str  e.g. "navy blue slim-fit blazer"
-        top_k : int
-
-        Returns
-        -------
-        list of result dicts
+        Find catalog items matching a text description (cross-modal search)
         """
         embedding = self.embedder.embed_text([query])[0]
         return self.get_index().search(embedding, top_k=top_k)
@@ -105,7 +126,7 @@ class FashionSearchEngine:
         embedding: np.ndarray,
         top_k: int = 10,
     ) -> List[Dict]:
-        """Search directly from a pre-computed embedding vector."""
+        """Search directly from a pre-computed embedding vector"""
         return self.get_index().search(embedding, top_k=top_k)
 
     @property

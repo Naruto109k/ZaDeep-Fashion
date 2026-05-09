@@ -1,8 +1,6 @@
 """
 ZaDeep Fashion — Streamlit Demo
 =============================
-Run with:
-    streamlit run app/app.py
 """
 
 import sys
@@ -12,8 +10,8 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.components import render_result_grid, render_sidebar, render_upload_zone
-from src.search.search_engine import FashionSearchEngine
+from components import render_result_grid, render_sidebar, render_upload_zone
+from search_engine import FashionSearchEngine
 
 # ── page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -49,14 +47,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-INDEX_DIR = Path("models/index")
+# ── FIXED: always relative to this file, not the terminal working directory ──
+INDEX_DIR = Path(__file__).resolve().parent / "models" / "index"
 
 
 # ── model loading (cached across reruns) ───────────────────────────────────────
 @st.cache_resource(show_spinner="Loading ZaDeep Fashion model…")
 def load_engine() -> FashionSearchEngine:
     engine = FashionSearchEngine()
-    if INDEX_DIR.exists():
+    if INDEX_DIR.exists() and any(INDEX_DIR.iterdir()):
         engine.load_index(INDEX_DIR)
     return engine
 
@@ -74,10 +73,14 @@ st.divider()
 
 engine = load_engine()
 
-if not INDEX_DIR.exists():
+if not INDEX_DIR.exists() or not any(INDEX_DIR.iterdir()):
     st.warning(
-        "No catalog index found at `models/index/`. "
-        "Run `python scripts/build_index.py` first to index your product images.",
+        f"No catalog index found at `{INDEX_DIR}`.\n\n"
+        "Run the following commands to build it:\n"
+        "```\n"
+        "cd 'Project Files'\n"
+        "python build_index.py --images clothes --output models/index\n"
+        "```",
         icon="⚠️",
     )
     st.stop()
@@ -100,3 +103,6 @@ if st.button("Search", type="primary", use_container_width=True):
 
     else:
         st.info("Please provide an image or a text query to search.")
+
+
+        ###python -m streamlit run "Project Files/app.py"

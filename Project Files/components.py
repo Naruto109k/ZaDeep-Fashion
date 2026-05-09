@@ -1,6 +1,5 @@
 """
-UI components for the ZaDeep Fashion Streamlit app.
-Each function is self-contained and returns data back to app.py.
+UI components for the ZaDeep Fashion Streamlit app
 """
 
 from __future__ import annotations

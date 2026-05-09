@@ -1,8 +1,6 @@
 """
 Dataset utilities
 -----------------
-Helpers for scanning a local image catalog directory and producing
-the ProductMeta list needed by CatalogIndexer.
 """
 
 from __future__ import annotations
@@ -12,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from src.indexer.catalog_indexer import ProductMeta
+from catalog_indexer import ProductMeta
 
 logger = logging.getLogger(__name__)
 
@@ -24,27 +22,18 @@ def scan_image_directory(
     category_from_parent: bool = True,
 ) -> List[ProductMeta]:
     """
-    Recursively scan a directory of product images.
-
-    Assumes structure:
-        root/
-            category_a/
-                image1.jpg
-                image2.jpg
-            category_b/
-                ...
-
-    If category_from_parent is True, the immediate parent folder name
-    is used as the category label. Otherwise category is left empty.
-
-    Returns
-    -------
-    List[ProductMeta]
+    Recursively scan a directory of product images
     """
-    root = Path(root)
+    root = Path(root).resolve()  # <-- FIXED: resolves to absolute path
+    
+    print(f"[DEBUG] Scanning directory: {root}")
+    print(f"[DEBUG] Directory exists: {root.exists()}")
+    print(f"[DEBUG] Is directory: {root.is_dir()}")
+    
     items: List[ProductMeta] = []
 
     for path in sorted(root.rglob("*")):
+        print(f"[DEBUG] Found file: {path}")  # <-- shows every file found
         if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             continue
         category = path.parent.name if category_from_parent else ""
@@ -70,20 +59,7 @@ def load_kaggle_fashion_csv(
     max_items: Optional[int] = None,
 ) -> List[ProductMeta]:
     """
-    Load metadata from the Kaggle Fashion Product Images dataset CSV.
-
-    The CSV has columns: id, gender, masterCategory, subCategory,
-    articleType, baseColour, season, year, usage, productDisplayName.
-
-    Parameters
-    ----------
-    csv_path   : path to styles.csv
-    image_root : directory where {id}.jpg images live
-    max_items  : cap the number of items (useful for quick experiments)
-
-    Returns
-    -------
-    List[ProductMeta]
+    Load metadata from the Kaggle Fashion Product Images dataset CSV
     """
     csv_path = Path(csv_path)
     image_root = Path(image_root)

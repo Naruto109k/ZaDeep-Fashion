@@ -1,8 +1,6 @@
 """
 FashionEmbedder
 ---------------
-Wraps Marqo-FashionCLIP to produce L2-normalised image and text embeddings.
-The model is loaded once and reused across calls.
 """
 
 from __future__ import annotations
@@ -14,50 +12,42 @@ from typing import List, Union
 import numpy as np
 import torch
 from PIL import Image
-from transformers import AutoModel, AutoProcessor
+import open_clip
 
 logger = logging.getLogger(__name__)
 
-MODEL_ID = "Marqo/marqo-fashionCLIP"
+MODEL_NAME = "ViT-B-32"
+PRETRAINED = "laion2b_s34b_b79k"
 
 
 class FashionEmbedder:
     """
-    Produces dense visual embeddings for clothing images using
-    Marqo-FashionCLIP, a ViT-B/16 model fine-tuned on 1M+ fashion products.
-
-    Parameters
-    ----------
-    model_id : str
-        HuggingFace model identifier. Defaults to Marqo/marqo-fashionCLIP.
-    device : str or None
-        'cuda', 'cpu', or None (auto-detect).
-    cache_dir : str or Path or None
-        Where to cache downloaded model weights.
+    Produces dense visual embeddings for clothing images using OpenCLIP
     """
 
     def __init__(
         self,
-        model_id: str = MODEL_ID,
         device: str | None = None,
-        cache_dir: str | Path | None = None,
+        model_name: str = MODEL_NAME,
+        pretrained: str = PRETRAINED,
     ) -> None:
-        self.model_id = model_id
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.cache_dir = str(cache_dir) if cache_dir else None
 
-        logger.info("Loading %s on %s …", model_id, self.device)
-        self.processor = AutoProcessor.from_pretrained(
-            model_id,
-            trust_remote_code=True,
-            cache_dir=self.cache_dir,
+        self.model_name = model_name
+        self.pretrained = pretrained
+
+        logger.info("Loading OpenCLIP model (%s) on %s …", model_name, self.device)
+
+        self.model, _, self.preprocess = open_clip.create_model_and_transforms(
+            self.model_name,
+            pretrained=self.pretrained,
         )
-        self.model = AutoModel.from_pretrained(
-            model_id,
-            trust_remote_code=True,
-            cache_dir=self.cache_dir,
-        ).to(self.device)
+
+        self.tokenizer = open_clip.get_tokenizer(self.model_name)
+
+        self.model = self.model.to(self.device)
         self.model.eval()
+
         logger.info("Model ready.")
 
     # ------------------------------------------------------------------
@@ -69,55 +59,39 @@ class FashionEmbedder:
         images: List[Union[str, Path, Image.Image]],
         batch_size: int = 32,
     ) -> np.ndarray:
-        """
-        Embed a list of images.
-
-        Parameters
-        ----------
-        images : list of file paths or PIL Images
-        batch_size : int
-
-        Returns
-        -------
-        np.ndarray of shape (N, embedding_dim), L2-normalised float32
-        """
         pil_images = [self._load_image(img) for img in images]
         all_embeddings: List[np.ndarray] = []
 
         for start in range(0, len(pil_images), batch_size):
             batch = pil_images[start : start + batch_size]
-            inputs = self.processor(images=batch, return_tensors="pt", padding=True).to(
-                self.device
-            )
+
+            image_tensors = torch.stack(
+                [self.preprocess(img) for img in batch]
+            ).to(self.device)
+
             with torch.no_grad():
-                features = self.model.get_image_features(**inputs)
-            all_embeddings.append(self._normalise(features).cpu().numpy())
+                features = self.model.encode_image(image_tensors)
+
+            all_embeddings.append(self._normalize(features).cpu().numpy())
 
         return np.vstack(all_embeddings).astype(np.float32)
 
     def embed_text(self, texts: List[str], batch_size: int = 64) -> np.ndarray:
-        """
-        Embed a list of text queries (for cross-modal search).
-
-        Returns
-        -------
-        np.ndarray of shape (N, embedding_dim), L2-normalised float32
-        """
         all_embeddings: List[np.ndarray] = []
 
         for start in range(0, len(texts), batch_size):
             batch = texts[start : start + batch_size]
-            inputs = self.processor(text=batch, return_tensors="pt", padding=True).to(
-                self.device
-            )
+
+            text_tokens = self.tokenizer(batch).to(self.device)
+
             with torch.no_grad():
-                features = self.model.get_text_features(**inputs)
-            all_embeddings.append(self._normalise(features).cpu().numpy())
+                features = self.model.encode_text(text_tokens)
+
+            all_embeddings.append(self._normalize(features).cpu().numpy())
 
         return np.vstack(all_embeddings).astype(np.float32)
 
     def embed_single_image(self, image: Union[str, Path, Image.Image]) -> np.ndarray:
-        """Convenience wrapper for a single query image."""
         return self.embed_images([image])[0]
 
     # ------------------------------------------------------------------
@@ -131,5 +105,5 @@ class FashionEmbedder:
         return Image.open(source).convert("RGB")
 
     @staticmethod
-    def _normalise(tensor: torch.Tensor) -> torch.Tensor:
+    def _normalize(tensor: torch.Tensor) -> torch.Tensor:
         return torch.nn.functional.normalize(tensor, p=2, dim=-1)

@@ -1,17 +1,6 @@
 """
 build_index.py
 --------------
-One-time script to embed all catalog images and build the FAISS index.
-
-Usage (on Colab or local GPU machine):
-    python scripts/build_index.py \
-        --csv data/fashion-dataset/styles.csv \
-        --images data/fashion-dataset/images \
-        --output models/index \
-        --batch_size 64 \
-        --max_items 10000   # optional: index a subset for quick testing
-
-The resulting index is saved to --output and is loaded by the app at runtime.
 """
 
 import argparse
@@ -23,9 +12,9 @@ from pathlib import Path
 # make src importable when running from project root
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.embedder.fashion_embedder import FashionEmbedder
-from src.indexer.catalog_indexer import CatalogIndexer
-from src.utils.dataset_utils import load_kaggle_fashion_csv, scan_image_directory
+from fashion_embedder import FashionEmbedder
+from catalog_indexer import CatalogIndexer
+from dataset_utils import load_kaggle_fashion_csv, scan_image_directory
 
 logging.basicConfig(
     level=logging.INFO,

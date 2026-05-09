@@ -1,0 +1,21 @@
+# ZaDeep Fashion dependencies
+# Install with: pip install -r requirements.txt
+
+# Core ML
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.38.0
+accelerate>=0.27.0
+
+# Vector search
+faiss-cpu>=1.7.4          # swap for faiss-gpu if you have CUDA
+
+# Image processing
+Pillow>=10.0.0
+
+# App
+streamlit>=1.32.0
+
+# Utilities
+numpy>=1.24.0
+tqdm>=4.66.0

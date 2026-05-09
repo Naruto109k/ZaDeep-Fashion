@@ -1,8 +1,6 @@
 """
 CatalogIndexer
 --------------
-Builds, saves, and loads a FAISS IVF-PQ index over product image embeddings.
-Designed to handle tens of thousands of catalog items comfortably on CPU/GPU.
 """
 
 from __future__ import annotations
@@ -22,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ProductMeta:
-    """Lightweight metadata stored alongside each indexed embedding."""
+    """Lightweight metadata stored alongside each indexed embedding"""
 
     image_path: str
     product_id: str
@@ -33,15 +31,8 @@ class ProductMeta:
 
 class CatalogIndexer:
     """
-    Manages a FAISS flat inner-product index over L2-normalised embeddings.
-    (Inner product on unit vectors == cosine similarity.)
-
-    Parameters
-    ----------
-    embedding_dim : int
-        Dimensionality of embedding vectors (512 for Marqo-FashionCLIP).
-    use_gpu : bool
-        Move the FAISS index to GPU if available (faster search).
+    Manages a FAISS flat inner-product index over L2-normalised embeddings
+    (Inner product on unit vectors == cosine similarity)
     """
 
     def __init__(self, embedding_dim: int = 512, use_gpu: bool = False) -> None:
@@ -60,7 +51,7 @@ class CatalogIndexer:
         metadata: List[ProductMeta],
     ) -> None:
         """
-        Build the index from a pre-computed embedding matrix.
+        Build the index from a pre-computed embedding matrix
 
         Parameters
         ----------
