@@ -7,10 +7,10 @@ Upload a clothing photo (or type a description) and ZaDeep Fashion returns the m
 ---
 
 ### 🖼️ Search by Image
-![Image Search Demo](assets/demo_image.gif)
+![Image Search Demo](Project%20Files/assets/demo_image.gif)
 
 ### 🔤 Search by Text
-![Text Search Demo](assets/demo_text.gif)
+![Text Search Demo](Project%20Files/assets/demo_text.gif)
 
 ---
 
