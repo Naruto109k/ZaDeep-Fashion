@@ -24,16 +24,10 @@ def scan_image_directory(
     """
     Recursively scan a directory of product images
     """
-    root = Path(root).resolve()  # <-- FIXED: resolves to absolute path
-    
-    print(f"[DEBUG] Scanning directory: {root}")
-    print(f"[DEBUG] Directory exists: {root.exists()}")
-    print(f"[DEBUG] Is directory: {root.is_dir()}")
-    
+    root = Path(root).resolve()
     items: List[ProductMeta] = []
 
     for path in sorted(root.rglob("*")):
-        print(f"[DEBUG] Found file: {path}")  # <-- shows every file found
         if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             continue
         category = path.parent.name if category_from_parent else ""
