@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from components import render_result_grid, render_sidebar, render_upload_zone
 from search_engine import FashionSearchEngine
 
-# ── page config ────────────────────────────────────────────────────────────────
+# ── page config 
 st.set_page_config(
     page_title="ZaDeep Fashion",
     page_icon="🔍",
@@ -21,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── custom CSS ─────────────────────────────────────────────────────────────────
+# ── custom CSS 
 st.markdown(
     """
     <style>
@@ -51,7 +51,7 @@ st.markdown(
 INDEX_DIR = Path(__file__).resolve().parent / "models" / "index"
 
 
-# ── model loading (cached across reruns) ───────────────────────────────────────
+# ── model loading (cached across reruns) 
 @st.cache_resource(show_spinner="Loading ZaDeep Fashion model…")
 def load_engine() -> FashionSearchEngine:
     engine = FashionSearchEngine()
@@ -60,10 +60,10 @@ def load_engine() -> FashionSearchEngine:
     return engine
 
 
-# ── sidebar ────────────────────────────────────────────────────────────────────
+# ── sidebar
 top_k, search_mode = render_sidebar()
 
-# ── main layout ────────────────────────────────────────────────────────────────
+# ── main layout 
 st.markdown("## 🔍 ZaDeep Fashion")
 st.markdown(
     "Upload a clothing image **or** describe what you're looking for — "
@@ -85,7 +85,7 @@ if not INDEX_DIR.exists() or not any(INDEX_DIR.iterdir()):
     )
     st.stop()
 
-# ── input zone ─────────────────────────────────────────────────────────────────
+# ── input zone
 query_image, query_text = render_upload_zone(search_mode)
 
 if st.button("Search", type="primary", use_container_width=True):

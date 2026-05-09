@@ -140,7 +140,3 @@ Open `colab_quickstart.ipynb` — it walks through dataset download, indexing, s
 - **Add metadata filtering**: filter FAISS results by category, gender, or colour before returning them.
 
 ---
-
-## License
-
-MIT

@@ -138,16 +138,7 @@ class CatalogIndexer:
         self, query_embedding: np.ndarray, top_k: int = 10
     ) -> List[Dict]:
         """
-        Return the top-k most similar catalog items for a query embedding.
-
-        Parameters
-        ----------
-        query_embedding : np.ndarray, shape (embedding_dim,) or (1, embedding_dim)
-        top_k           : int
-
-        Returns
-        -------
-        List of dicts with keys: rank, score, product_id, image_path, category, name
+        Return the top-k most similar catalog items for a query embedding
         """
         if self._index is None:
             raise RuntimeError("Index not built. Call build() or load() first.")

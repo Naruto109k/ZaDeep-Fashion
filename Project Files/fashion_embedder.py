@@ -1,6 +1,7 @@
 """
 FashionEmbedder
 ---------------
+Wraps Marqo-FashionCLIP to produce L2-normalised image and text embeddings
 """
 
 from __future__ import annotations
@@ -22,7 +23,8 @@ PRETRAINED = "laion2b_s34b_b79k"
 
 class FashionEmbedder:
     """
-    Produces dense visual embeddings for clothing images using OpenCLIP
+    Produces dense visual embeddings for clothing images using
+    Marqo-FashionCLIP (ViT-B/32), fine-tuned on fashion products.
     """
 
     def __init__(
@@ -59,6 +61,9 @@ class FashionEmbedder:
         images: List[Union[str, Path, Image.Image]],
         batch_size: int = 32,
     ) -> np.ndarray:
+        """
+        Embed a list of images
+        """
         pil_images = [self._load_image(img) for img in images]
         all_embeddings: List[np.ndarray] = []
 
@@ -77,6 +82,9 @@ class FashionEmbedder:
         return np.vstack(all_embeddings).astype(np.float32)
 
     def embed_text(self, texts: List[str], batch_size: int = 64) -> np.ndarray:
+        """
+        Embed a list of text queries (for cross-modal search)
+        """
         all_embeddings: List[np.ndarray] = []
 
         for start in range(0, len(texts), batch_size):

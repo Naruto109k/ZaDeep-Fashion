@@ -1,5 +1,6 @@
 """
 UI components for the ZaDeep Fashion Streamlit app
+Each function is self-contained and returns data back to app.py
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ from PIL import Image
 
 
 def render_sidebar() -> Tuple[int, str]:
-    """Render sidebar controls. Returns (top_k, search_mode)."""
+    """Render sidebar controls. Returns (top_k, search_mode)"""
     with st.sidebar:
         st.markdown("### ⚙️ Search settings")
 
@@ -46,8 +47,8 @@ def render_upload_zone(
     search_mode: str,
 ) -> Tuple[Optional[Image.Image], Optional[str]]:
     """
-    Render the query input area.
-    Returns (pil_image, text_query) — one will be None depending on mode.
+    Render the query input area
+    Returns (pil_image, text_query) — one will be None depending on mode
     """
     query_image: Optional[Image.Image] = None
     query_text: Optional[str] = None

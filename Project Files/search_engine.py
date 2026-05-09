@@ -46,7 +46,7 @@ def _find_index_dir() -> Path:
 
 class FashionSearchEngine:
     """
-    Unified interface for fashion visual search.
+    Unified interface for fashion visual search
 
     Usage
     -----
@@ -107,6 +107,7 @@ class FashionSearchEngine:
         """
         Find catalog items visually similar to a query image
         """
+        
         embedding = self.embedder.embed_single_image(image)
         return self.get_index().search(embedding, top_k=top_k)
 
@@ -118,6 +119,7 @@ class FashionSearchEngine:
         """
         Find catalog items matching a text description (cross-modal search)
         """
+        
         embedding = self.embedder.embed_text([query])[0]
         return self.get_index().search(embedding, top_k=top_k)
 
